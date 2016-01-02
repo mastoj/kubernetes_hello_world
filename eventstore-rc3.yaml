@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: eventstore
+  labels:
+    component: eventstore
+spec:
+  replicas: 3
+  selector:
+    component: eventstore
+  template:
+    metadata:
+      labels:
+        component: eventstore
+    spec:
+      serviceAccount: eventstore
+      containers:
+      - name: eventstore
+        image: mastoj/eventstore
+        command: ["./run.sh","--ext-ip=$eth0","--int-ip=$eth0","--cluster-size=3","--cluster-gossip-port=2113","--cluster-dns=eventstore.default","--run-projections=all"] #,"--ext-http-prefixes=http://eventstore.default.svc.cluster.local:2113/"]
+        # command: ["./run.sh","--ext-ip=$eth0","--int-ip=$eth0","--cluster-size=1","--cluster-gossip-port=2113","--cluster-dns=eventstore.default","--run-projections=all", "--ext-ip-advertise-as=$eth0", "--ext-http-port-advertise-as=2113", "--ext-tcp-port-advertise-as=1113", "--int-ip-advertise-as=$eth0", "--int-http-port-advertise-as=2112", "--int-tcp-port-advertise-as=1112", "--ext-http-prefixes=http://eventstore.default:2113/"] #,"--ext-http-prefixes=http://eventstore.default.svc.cluster.local:2113/"]
+        ports:
+        - containerPort: 2113
+          name: http
+          protocol: TCP
+        - containerPort: 2112
+          name: http2
+          protocol: TCP
+        - containerPort: 1112
+          name: transport2
+          protocol: TCP
+        - containerPort: 1113
+          name: transport
+          protocol: TCP
+#        volumeMounts:
+#        - mountPath: /data
+#          name: storage
+#      volumes:
+#      - name: storage
+#        source:
+#          emptyDir: {}
